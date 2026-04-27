@@ -3,17 +3,28 @@
 import { useState } from 'react';
 import type { Practice } from '@/types';
 import { markPracticeComplete } from '@/lib/progress';
+import { toggleBookmark } from '@/lib/bookmarks';
+import BookmarkButton from './BookmarkButton';
 
 interface PracticeCardProps {
   practice: Practice;
   completed: boolean;
+  bookmarked?: boolean;
   onComplete?: (id: string) => void;
+  onBookmark?: () => void;
 }
 
-export default function PracticeCard({ practice, completed, onComplete }: PracticeCardProps) {
+export default function PracticeCard({ practice, completed, bookmarked = false, onComplete, onBookmark }: PracticeCardProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const [started, setStarted] = useState(false);
+  const [localBookmarked, setLocalBookmarked] = useState(bookmarked);
+
+  const handleBookmark = () => {
+    toggleBookmark('practice', practice.id, practice.title);
+    setLocalBookmarked((v) => !v);
+    onBookmark?.();
+  };
 
   const handleComplete = () => {
     markPracticeComplete(practice.id);
@@ -43,30 +54,33 @@ export default function PracticeCard({ practice, completed, onComplete }: Practi
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className={`w-full text-left bg-white rounded-2xl shadow-sm border p-4 transition-all ${
-          completed ? 'border-sage-200 opacity-75' : 'border-stone-100'
-        }`}
-      >
-        <div className="flex items-start gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[practice.type] || 'bg-stone-100 text-stone-500'}`}>
-                {typeLabel[practice.type]}
-              </span>
-              {completed && (
-                <span className="text-xs bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium">Done</span>
-              )}
+      <div className={`bg-white rounded-2xl shadow-sm border transition-all ${completed ? 'border-sage-200 opacity-75' : 'border-stone-100'}`}>
+        <div className="flex items-center pr-2">
+          <button
+            onClick={() => setOpen(true)}
+            className="flex-1 text-left p-4 min-w-0"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColors[practice.type] || 'bg-stone-100 text-stone-500'}`}>
+                    {typeLabel[practice.type]}
+                  </span>
+                  {completed && (
+                    <span className="text-xs bg-sage-100 text-sage-700 px-2 py-0.5 rounded-full font-medium">Done</span>
+                  )}
+                </div>
+                <p className="font-semibold text-stone-800 text-sm">{practice.title}</p>
+                <p className="text-xs text-stone-500 mt-1">~{practice.durationMinutes} minutes · For both of you</p>
+              </div>
+              <svg className="w-4 h-4 text-stone-400 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+              </svg>
             </div>
-            <p className="font-semibold text-stone-800 text-sm">{practice.title}</p>
-            <p className="text-xs text-stone-500 mt-1">~{practice.durationMinutes} minutes · For both of you</p>
-          </div>
-          <svg className="w-4 h-4 text-stone-400 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-          </svg>
+          </button>
+          <BookmarkButton bookmarked={localBookmarked} onToggle={handleBookmark} size="sm" />
         </div>
-      </button>
+      </div>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">

@@ -82,7 +82,8 @@ export default function SafetyBanner() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-20 right-4 z-50 w-11 h-11 rounded-full bg-terracotta text-white flex items-center justify-center shadow-lg text-lg font-bold"
+        className="fixed right-4 z-50 w-11 h-11 rounded-full bg-terracotta text-white flex items-center justify-center shadow-lg text-lg font-bold"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 5rem)' }}
         aria-label="When to call your provider"
         title="When to call your provider"
       >

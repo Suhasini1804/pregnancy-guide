@@ -6,10 +6,10 @@ interface DailyCardProps {
   emoji: string;
   text: string;
   completed: boolean;
-  onComplete: (id: string) => void;
+  onToggle: (id: string) => void;
 }
 
-export default function DailyCard({ id, label, emoji, text, completed, onComplete }: DailyCardProps) {
+export default function DailyCard({ id, label, emoji, text, completed, onToggle }: DailyCardProps) {
   return (
     <div
       className={`bg-white rounded-2xl p-4 shadow-sm border transition-all ${
@@ -25,19 +25,24 @@ export default function DailyCard({ id, label, emoji, text, completed, onComplet
           </p>
         </div>
         <button
-          onClick={() => !completed && onComplete(id)}
-          className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-            completed
-              ? 'bg-sage-500 border-sage-500 text-white'
-              : 'border-stone-300 hover:border-sage-400'
-          }`}
-          aria-label={completed ? 'Completed' : 'Mark complete'}
+          onClick={() => onToggle(id)}
+          className={`flex-shrink-0 flex items-center justify-center transition-all min-h-[44px] min-w-[44px] -mr-2 -my-2`}
+          aria-label={completed ? 'Mark incomplete' : 'Mark complete'}
+          aria-pressed={completed}
         >
-          {completed && (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-            </svg>
-          )}
+          <span
+            className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+              completed
+                ? 'bg-sage-500 border-sage-500 text-white'
+                : 'border-stone-300 hover:border-sage-400'
+            }`}
+          >
+            {completed && (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            )}
+          </span>
         </button>
       </div>
     </div>

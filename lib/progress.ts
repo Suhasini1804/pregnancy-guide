@@ -1,6 +1,6 @@
 'use client';
 
-import type { UserProgress, BadgeId } from '@/types';
+import type { UserProgress, BadgeId, BirthPlanSectionState } from '@/types';
 import { getTodayTaskKey, getWeeklyTaskKey } from './dates';
 
 const STORAGE_KEY = 'pregnancy-guide-progress';
@@ -22,6 +22,11 @@ const defaultProgress: UserProgress = {
   feedingPlanReady: false,
   weeklyTasksCompleted: {},
   disclaimerAccepted: false,
+  bookmarks: [],
+  hospitalBagItems: {},
+  hospitalBagNotes: {},
+  notificationsEnabled: false,
+  notificationTime: null,
 };
 
 export function getProgress(): UserProgress {
@@ -38,6 +43,23 @@ export function getProgress(): UserProgress {
 export function saveProgress(progress: UserProgress): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+export function toggleTask(taskId: string): UserProgress {
+  const progress = getProgress();
+  const todayKey = getTodayTaskKey();
+  const weekKey = getWeeklyTaskKey();
+  const fullTaskKey = `${todayKey}:${taskId}`;
+
+  if (progress.completedTasks[fullTaskKey]) {
+    delete progress.completedTasks[fullTaskKey];
+    const current = progress.weeklyTasksCompleted[weekKey] || 0;
+    if (current > 0) progress.weeklyTasksCompleted[weekKey] = current - 1;
+    saveProgress(progress);
+    return progress;
+  }
+
+  return markTaskComplete(taskId);
 }
 
 export function markTaskComplete(taskId: string): UserProgress {
@@ -106,13 +128,11 @@ export function markPracticeComplete(practiceId: string): UserProgress {
 
 export function saveBirthPlanSection(
   sectionId: string,
-  selected: string[],
-  freeText: string
+  state: BirthPlanSectionState
 ): UserProgress {
   const progress = getProgress();
-  progress.birthPlan[sectionId] = { selected, freeText };
+  progress.birthPlan[sectionId] = state;
 
-  // award badge if at least 3 sections have content
   const filledSections = Object.values(progress.birthPlan).filter(
     (v) => v.selected.length > 0 || v.freeText.trim().length > 0
   );
@@ -154,7 +174,21 @@ export function setFeedingPlanReady(ready: boolean): UserProgress {
   return progress;
 }
 
-export function updateSettings(updates: Partial<Pick<UserProgress, 'edd' | 'userName' | 'partnerName' | 'postpartumStartDate' | 'disclaimerAccepted'>>): UserProgress {
+export function toggleHospitalBagItem(itemId: string): UserProgress {
+  const progress = getProgress();
+  progress.hospitalBagItems[itemId] = !progress.hospitalBagItems[itemId];
+  saveProgress(progress);
+  return progress;
+}
+
+export function setHospitalBagItemNote(itemId: string, note: string): UserProgress {
+  const progress = getProgress();
+  progress.hospitalBagNotes[itemId] = note;
+  saveProgress(progress);
+  return progress;
+}
+
+export function updateSettings(updates: Partial<Pick<UserProgress, 'edd' | 'userName' | 'partnerName' | 'postpartumStartDate' | 'disclaimerAccepted' | 'notificationsEnabled' | 'notificationTime'>>): UserProgress {
   const progress = getProgress();
   Object.assign(progress, updates);
   saveProgress(progress);

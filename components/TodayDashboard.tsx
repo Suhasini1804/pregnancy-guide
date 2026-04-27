@@ -5,7 +5,8 @@ import Link from 'next/link';
 import DailyCard from './DailyCard';
 import StreakWidget from './StreakWidget';
 import BadgeDisplay from './BadgeDisplay';
-import { getProgress, markTaskComplete, isTaskCompleted, getWeeklyCompletionPercent } from '@/lib/progress';
+import ReminderBanner from './ReminderBanner';
+import { getProgress, toggleTask, isTaskCompleted, getWeeklyCompletionPercent } from '@/lib/progress';
 import { getWeekAndDayFromEDD, getPostpartumWeek, isPostpartum } from '@/lib/dates';
 import { weekRoadmap } from '@/data/weekRoadmap';
 import { postpartumRoadmap } from '@/data/postpartumRoadmap';
@@ -57,8 +58,8 @@ export default function TodayDashboard() {
 
     const weeklyPercent = getWeeklyCompletionPercent(progress, DAILY_TASK_COUNT);
 
-    const handleComplete = (taskId: string) => {
-      const updated = markTaskComplete(taskId);
+    const handleToggle = (taskId: string) => {
+      const updated = toggleTask(taskId);
       setProgress({ ...updated });
     };
 
@@ -81,7 +82,7 @@ export default function TodayDashboard() {
               emoji={task.emoji}
               text={task.text}
               completed={isTaskCompleted(task.id, progress)}
-              onComplete={handleComplete}
+              onToggle={handleToggle}
             />
           ))}
         </div>
@@ -117,8 +118,8 @@ export default function TodayDashboard() {
     { id: 'partner', label: 'Partner Action', emoji: '🤝', text: weekData.dailyCards.partnerAction },
   ];
 
-  const handleComplete = (taskId: string) => {
-    const updated = markTaskComplete(taskId);
+  const handleToggle = (taskId: string) => {
+    const updated = toggleTask(taskId);
     setProgress({ ...updated });
   };
 
@@ -126,6 +127,8 @@ export default function TodayDashboard() {
 
   return (
     <div className="space-y-4 pb-2">
+      <ReminderBanner />
+
       <div className="bg-gradient-to-br from-sage-400 to-sage-600 rounded-2xl p-5 text-white">
         <p className="text-sm opacity-80">
           {weeksRemaining > 0 ? `${weeksRemaining} weeks until due date` : 'Due this week'}
@@ -147,10 +150,25 @@ export default function TodayDashboard() {
             emoji={task.emoji}
             text={task.text}
             completed={isTaskCompleted(task.id, progress)}
-            onComplete={handleComplete}
+            onToggle={handleToggle}
           />
         ))}
       </div>
+
+      {/* Hospital bag quick-link */}
+      <Link
+        href="/hospital-bag"
+        className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-stone-100 min-h-[56px]"
+      >
+        <span className="text-xl flex-shrink-0">🎒</span>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-stone-700">Hospital Bag</p>
+          <p className="text-xs text-stone-400">Pack and track what you need</p>
+        </div>
+        <svg className="w-4 h-4 text-stone-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+        </svg>
+      </Link>
 
       <BadgeDisplay earnedBadges={progress.earnedBadges} />
     </div>

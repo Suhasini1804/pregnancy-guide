@@ -107,6 +107,61 @@ export interface BirthPlanSection {
   freeTextPrompt?: string;
 }
 
+// ── V2: Bookmarks ────────────────────────────────────────────────────────────
+
+export type BookmarkItemType =
+  | 'lesson'
+  | 'roadmap-week'
+  | 'practice'
+  | 'birth-plan-section'
+  | 'postpartum-week';
+
+export interface Bookmark {
+  itemType: BookmarkItemType;
+  itemId: string;
+  title: string;
+  createdAt: string;
+}
+
+// ── V2: Birth plan (richer state) ────────────────────────────────────────────
+
+export type BirthPlanPriority = 'must-have' | 'prefer' | 'flexible';
+
+export interface BirthPlanOptionState {
+  selected: boolean;
+  priority: BirthPlanPriority;
+  notes: string;
+}
+
+export interface BirthPlanSectionState {
+  selected: string[];
+  optionStates: Record<string, BirthPlanOptionState>;
+  freeText: string;
+}
+
+// ── V2: Birth plan section data shape (for data/birthPlanSections.ts) ────────
+
+export interface BirthPlanSectionData {
+  id: string;
+  title: string;
+  description: string;
+  options: BirthPlanOption[];
+  providerQuestions: string[];
+}
+
+// ── V2: Hospital bag ─────────────────────────────────────────────────────────
+
+export type HospitalBagTiming = 'early' | 'week-36' | 'last-minute' | 'day-of';
+
+export interface HospitalBagItem {
+  id: string;
+  category: string;
+  label: string;
+  timing: HospitalBagTiming;
+}
+
+// ── UserProgress ─────────────────────────────────────────────────────────────
+
 export interface UserProgress {
   edd: string | null;
   partnerName: string;
@@ -117,13 +172,20 @@ export interface UserProgress {
   completedLessons: string[];
   completedPractices: string[];
   earnedBadges: BadgeId[];
-  birthPlan: Record<string, { selected: string[]; freeText: string }>;
+  birthPlan: Record<string, BirthPlanSectionState>;
   postpartumStartDate: string | null;
   hospitalBagReady: boolean;
   postpartumPlanReady: boolean;
   feedingPlanReady: boolean;
   weeklyTasksCompleted: Record<string, number>;
   disclaimerAccepted: boolean;
+  // V2
+  bookmarks: Bookmark[];
+  hospitalBagItems: Record<string, boolean>;
+  hospitalBagNotes: Record<string, string>;
+  notificationsEnabled: boolean;
+  notificationTime: string | null;
+  lastSyncedAt?: string;
 }
 
 export interface SafetyWarning {

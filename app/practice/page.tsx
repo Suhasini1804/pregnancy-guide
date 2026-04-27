@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import PracticeCard from '@/components/PracticeCard';
 import { practices } from '@/data/practices';
 import { getProgress } from '@/lib/progress';
+import { isBookmarked } from '@/lib/bookmarks';
 import type { UserProgress } from '@/types';
 
 export default function PracticePage() {
@@ -23,6 +24,10 @@ export default function PracticePage() {
         ? { ...prev, completedPractices: [...new Set([...prev.completedPractices, id])] }
         : prev
     );
+  };
+
+  const handleBookmark = () => {
+    setProgress(getProgress());
   };
 
   return (
@@ -47,7 +52,9 @@ export default function PracticePage() {
             key={practice.id}
             practice={practice}
             completed={progress ? progress.completedPractices.includes(practice.id) : false}
+            bookmarked={progress ? isBookmarked('practice', practice.id, progress) : false}
             onComplete={handleComplete}
+            onBookmark={handleBookmark}
           />
         ))}
       </div>
